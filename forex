@@ -1,0 +1,94 @@
+import os
+import logging
+from dotenv import load_dotenv
+from telegram import Update
+from telegram.ext import Application, CommandHandler, MessageHandler, filters, ContextTypes
+
+# Load environment variables (useful for local testing)
+load_dotenv()
+
+# Enable logging so you can see errors/info in the console
+logging.basicConfig(
+    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s", level=logging.INFO
+)
+logger = logging.getLogger(__name__)
+
+# --- Handlers ---
+
+async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    """Handles the /start command."""
+    welcome_message = (
+        "🤖 Welcome to Umar Trades Bot 🚀\n\n"
+        "📊 Are you struggling in trading or looking to grow your account?\n"
+        "You’re in the right place ✅\n\n"
+        "We trade using Smart Money Concepts (SMC), ICT & Advanced Price Action.\n\n"
+        "💼 Our Services:\n\n"
+        "📈 Trading Signals\n"
+        "• High Accuracy Forex, Gold & Crypto Signals\n"
+        "• Entry, SL & TP included\n"
+        "• Daily updates\n\n"
+        "💼 Account Management\n"
+        "• We trade on your behalf\n"
+        "• Secure & risk-managed trading\n\n"
+        "🛠 Other Services\n"
+        "• Mentorship & 1-on-1 guidance\n"
+        "• Market analysis\n\n"
+        "👇 Choose an option:\n"
+        "1 - Signals\n"
+        "2 - Account Management\n"
+        "3 - Other Services"
+    )
+    await update.message.reply_text(welcome_message)
+
+
+async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    """Handles standard text messages (1, 2, 3, or invalid input)."""
+    text = update.message.text.strip()
+    
+    contact_info = (
+        "👉 For more details:\n"
+        "Contact 👇\n"
+        "@Ali_Trades01\n"
+        "@Ali_Trades02"
+    )
+
+    if text == "1":
+        response = f"📈 Signals Service\n\n{contact_info}"
+        await update.message.reply_text(response)
+    
+    elif text == "2":
+        response = f"💼 Account Management\n\n{contact_info}"
+        await update.message.reply_text(response)
+    
+    elif text == "3":
+        response = f"🛠 Other Services\n\n{contact_info}"
+        await update.message.reply_text(response)
+    
+    else:
+        # Default fallback reply
+        await update.message.reply_text("Please choose 1, 2 or 3")
+
+
+# --- Main Application ---
+
+def main() -> None:
+    """Starts the bot."""
+    # Get the token from environment variables
+    token = os.getenv("BOT_TOKEN")
+    if not token:
+        logger.error("BOT_TOKEN is not set! Please add it to your environment.")
+        return
+
+    # Build the application
+    application = Application.builder().token(token).build()
+
+    # Add command and message handlers
+    application.add_handler(CommandHandler("start", start_command))
+    application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message))
+
+    # Run the bot using polling
+    logger.info("Bot is running in polling mode...")
+    application.run_polling(allowed_updates=Update.ALL_TYPES)
+
+if __name__ == "__main__":
+    main()
